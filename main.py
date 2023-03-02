@@ -6,24 +6,48 @@
 
 """---------Es gibt noch einen fehler bei aufgabe 3 aus ich versuche einen egenen Algorythmuss aus"""
 import numpy as np
-LR = np.array(np.random.rand(3,3))
-B = np.array(np.random.rand(3))
-print("LR:",LR,"\n")
+def step(A,b):
 
-def forwardEl(A,b):
+    assert (len(A)==len(b)), "dimension error"
+
     a = A
     n = len(b)
-    l= A#np.zeros((n,n))
-    ln = np.empty([n,n])
     m = 0.0
-    xs= 0
-    m = l[:,xs]/l[0,0]
+    m = a[:,0]/a[0,0]
     m = np.delete(m,0)
     for k in range(1,n):
-        l[k,:] -= m[k-1]*l[0,:]
-    print(l)
-    return l
+        a[k,:] -= m[k-1]*a[0,:]
+    return a
+def matrix_einf(corner, bigMatrix ,smalMatrix):
+    #Check dimensions
+    assert (len(corner) == 2), "array für den Eckpunkt hat die falsche Dimensin"
+    assert (len(bigMatrix) >= len(smalMatrix)), "array für den Eckpunkt hat die falsche Dimensin"
+    bMat = bigMatrix
+    sMat = smalMatrix
+    bMat[corner[0]:,corner[1]:] = sMat[0:,0:]
+    return bMat
+def matrix_resize(new_pivot, orgiMatrix): #gibt eine kleinere Matrix zurück
+    return orgiMatrix[new_pivot[0]:,new_pivot[1]:]
+"""----------------------------------------------------------------------------------"""
 
-forwardEl(LR,B)
+LR = np.array(np.random.rand(100,100))
+B = np.array(np.random.rand(100))
+
+
+
+
+
+
+for x in range(len(B)-1):
+    H = matrix_resize([x, x], LR)
+    #print("H",x,":", H, "\n")
+    H = step(H, B[0:(len(B)-x)]) #temporär Fix
+    LR = matrix_einf([x, x], LR, H)
+
+LR = LR
+print("LR:",LR,"\n")
+
+
+
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
