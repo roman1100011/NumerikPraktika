@@ -7,8 +7,6 @@
 """---------Es gibt noch einen fehler bei aufgabe 3 aus ich versuche einen egenen Algorythmuss aus"""
 import numpy as np
 def step(A,B):
-
-
     b = B
     a = A
     n = len(b)
@@ -18,7 +16,7 @@ def step(A,B):
     for k in range(1,n):
         a[k,:] -= m[k-1]*a[0,:]
         b[k] -= m[k - 1] * b[0]
-    return a,b
+    return a,b,m
 def matrix_einf(corner, bigMatrix ,smalMatrix):
     #Check dimensions
     assert (len(corner) == 2), "array für den Eckpunkt hat die falsche Dimensin"
@@ -40,11 +38,12 @@ def matrix_resize(new_pivot, orgiMatrix): #gibt eine kleinere Matrix zurück
 def vector_resize(new_pivot, orgiMatrix): #gibt eine kleinere Matrix zurück
     return orgiMatrix[new_pivot[0]:]
 
+
 """----------------------------------------------------------------------------------"""
 
-LR = np.array(np.random.rand(3,3))
-B = np.array(np.random.rand(3))
-
+LR = np.array(np.random.rand(4,4))
+B = np.array(np.random.rand(4))
+m = np.array(np.zeros([4,4]))
 
 print("LR:",LR,"B: ",B,"\n")
 
@@ -53,12 +52,15 @@ print("LR:",LR,"B: ",B,"\n")
 for x in range(len(B)-1):
     H = matrix_resize([x, x], LR)
     #print("H",x,":", H, "\n")
-    H,G = step(H, vector_resize([x,0],B)) #temporär Fix
+    H,G,m[x+1:,x] = step(H, vector_resize([x,0],B)) #temporär Fix
+    m[x,x]=1
     LR = matrix_einf([x, x], LR, H)
     B = vector_einf([x,0],B,G)
 
-LR = LR
+
 print("LR:",LR,"B: ",B,"\n")
+print("m:",m,"\n")
+print("LR@m:",m @ LR,"\n")
 
 
 
