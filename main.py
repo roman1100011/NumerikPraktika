@@ -104,10 +104,11 @@ def LU_zerlegung(A,x):
 """-------------------------FSubs-----------------------------------------"""
 def fbSubsBerti(LR,b):
     assert(len(LR) == len(b)), "Dimension error"
-    x = b
+    x = b.copy()
     n= len(b)
     for i in range(0,len(b)-1):
-        x[i+1] -= sum(np.multiply(LR[i+1,:i],x[:i]))/LR[i+1,i+1]
+        x[i+1] = sum(np.multiply(LR[i+1,:i],x[:i]))/LR[i+1,i+1]
+    print("mien X:", x,"\n")
     return x
 """---------------------Test von Iwan----------------------------------------"""
 n = 3  # Dimension der Koeffizientenmatrix
