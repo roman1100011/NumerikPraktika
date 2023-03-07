@@ -110,6 +110,39 @@ def fbSubsBerti(LR,b):
         x[i+1] = sum(np.multiply(LR[i+1,:i],x[:i]))/LR[i+1,i+1]
     print("mien X:", x,"\n")
     return x
+"""-------------------------relativer fehler----------------------------------"""
+"""-------------------------IWAN----------------------------------------------"""
+import numpy.linalg as lin
+import numpy.random as rnd
+
+# random orthogonal matrix
+def rndOrtho(n):
+    S = rnd.rand(n,n)
+    S = S - S.T
+    O = lin.solve(S - np.identity(n), S + np.identity(n))
+    return O
+
+# random matrix with specified condition number
+def rndCond(n, cond):
+    d = np.logspace(-np.log10(cond)/2, np.log10(cond)/2,n);
+    A = np.diag(d)
+    U,V = rndOrtho(n), rndOrtho(n)
+    return U@A@V.T
+"""-------------------------Berti----------------------------------------------"""
+N = 100
+for k in range(N):
+    A = rndCond(3, 1e14)
+def relError(A):
+    A = A.copy()
+    n = len(A)
+    b = np.random.rand(n)
+    x = linsolve(A, b)
+    b1 = np.linalg.inv(A) @ x
+    print("orginal rhs: ",rhs,"\n")
+    print("fehler rhs: ", rhs1, "\n")
+    return rhs
+v =relError(A)
+
 """---------------------Test von Iwan----------------------------------------"""
 n = 3  # Dimension der Koeffizientenmatrix
 for k in range(1000):  # Testläufe
