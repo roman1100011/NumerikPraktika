@@ -20,7 +20,7 @@ y=data[:,1]
 fig, ax = plt.subplots()
 ax.plot(x,y,linewidth=2.0)
 
-ax.set(xlim=(0,len(x)), xticks=np.arange(0, len(x)),
+ax.set(xlim=(0,np.argmax()), xticks=np.arange(0, len(x)),
        ylim=(-2, 3), yticks=np.arange(-2,3))
 
 plt.show()
