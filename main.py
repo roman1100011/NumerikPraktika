@@ -7,6 +7,7 @@
 """---------Es gibt noch einen fehler bei aufgabe 3 aus ich versuche einen egenen Algorythmuss aus"""
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sy
 plt.style.use('_mpl-gallery')
 
 #---------------------------------------Data importieren--------------------------------
@@ -39,12 +40,3 @@ ax.set_xlabel("Amplitude [V]")
 
 plt.show()
 
-
-
-fig, ax = plt.subplots()
-ax.plot(time,fit,linewidth=0.1)
-ax.set(xlim=(0,np.amax(time)), xticks=np.arange(0, np.amax(time)),
-       ylim=(np.amin(fit)-0.1, np.amax(fit)+0.1), yticks=np.arange(np.amin(fit)-0.1, np.amax(fit)+0.1))
-plt.show()
-print("smapl time: ", Ts,'\n')
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
