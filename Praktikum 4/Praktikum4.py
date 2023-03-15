@@ -21,19 +21,15 @@ y=data[:,1]
 #--------------------------------------Abtastrate---------------------------------------------
 Ts=np.amax(x)/(len(x)-1)
 #--------------------------------------System---------------------------------------------
-n = 1+5*2 #anzahl Schwingungen
-A = np.array(np.zeros([n,len(r)]))
+n = 5 #anzahl Schwingungen
+A = np.array(np.zeros(n,3))
 #symbolische def (provisorisch
 a_0,a_1,a_2,a_3,a_4,a_5= 0,0,0,0,0,0
 b_1,b_2,b_3,b_4,b_5 = 0,0,0,0,0
-r = np.array([[a_0,0,0,0,0],[a_1,a_2,a_3,a_4,a_5],[b_1,b_2,b_3,b_4,b_5]])
-r = r.T
-A[0,:]= 0.5
-for o in range(n):
-    if( np.mod(o,2)<1):
-        A[o,:] = [np.cos(o*x[:]),]
-
-
+x = [[a_0,0,0,0,0],[a_1,a_2,a_3,a_4,a_5],[b_1,b_2,b_3,b_4,b_5]]
+A = [1/2 , 0,0] [1/2 , np.cos(1*1)]
+for i in range(n):
+    A[n,0] =
 #--------------------------------------Plot---------------------------------------------
 fig, ax = plt.subplots()
 ax.plot(x,y)
