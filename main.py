@@ -8,6 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
+from scipy.linalg import solve_triangular
 plt.style.use('_mpl-gallery')
 
 #---------------------------------------Data importieren--------------------------------
@@ -22,23 +23,36 @@ y=data[:,1]
 Ts=np.amax(x)/(len(x)-1)
 #--------------------------------------System---------------------------------------------
 n = 1+5*2 #anzahl Schwingungen
-A = np.array(np.zeros([n,len(r)]))
-#symbolische def (provisorisch
-a_0,a_1,a_2,a_3,a_4,a_5= 0,0,0,0,0,0
-b_1,b_2,b_3,b_4,b_5 = 0,0,0,0,0
-r = np.array([[a_0,0,0,0,0],[a_1,a_2,a_3,a_4,a_5],[b_1,b_2,b_3,b_4,b_5]])
-r = r.T
-A[0,:]= 0.5
-for o in range(n):
-    if( np.mod(o,2)<1):
-        A[o,:] = [np.cos(o*x[:]),]
+A = np.array(np.zeros([n,len(x)]))
+
+A[0,]= 0.5
+for o in range(1,n):
+    if( np.mod(o,2)==1):
+        A[o,1:] = np.cos(o*x[1:])
+    if (np.mod(o,2) == 0):
+        A[o,1:] = np.sin(o * x[1:])
+
+#-----A^TA ausrechnen---------------------
+A_dig = A@ A.T
+b_dig = y @ A.T
+#Cholesky zerlegung
+L = np.linalg.cholesky(A_dig)
+#     Ly = A^T *b nach y auflösen
+los = solve_triangular(L,b_dig)/len(b_dig)
+
+
+
+fit = np.array(np.zeros(len(x)))
+fit[:] = (A.T @ los)
+
+
 
 
 #--------------------------------------Plot---------------------------------------------
 fig, ax = plt.subplots()
-ax.plot(x,y)
+ax.plot(x,y,x,fit)
 ax.set(xlim=(0,np.amax(x)), xticks=np.arange(0, np.amax(x)),
-       ylim=(np.amin(y)-0.1, np.amax(y)+0.1), yticks=np.arange(np.amin(y)-0.1, np.amax(y)+0.1))
+       ylim=(np.amin(fit)-0.1, np.amax(fit)+0.1), yticks=np.arange(np.amin(fit)-0.1, np.amax(fit)+0.1))
 ax.set_xlabel("time [s]")
 ax.set_xlabel("Amplitude [V]")
 
