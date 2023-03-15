@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
 from scipy.linalg import solve_triangular
+from scipy.linalg import cholesky
 plt.style.use('_mpl-gallery')
 
 #---------------------------------------Data importieren--------------------------------
@@ -31,19 +32,21 @@ for o in range(1,n):
         A[o,1:] = np.cos(o*x[1:])
     if (np.mod(o,2) == 0):
         A[o,1:] = np.sin(o * x[1:])
-
+A = A.T
 #-----A^TA ausrechnen---------------------
-A_dig = A@ A.T
-b_dig = y @ A.T
+A_dig = A.T @ A
+b_dig = A.T @ y
 #Cholesky zerlegung
-L = np.linalg.cholesky(A_dig)
+L = cholesky(A_dig,lower = True)
+
 #     Ly = A^T *b nach y auflösen
-los = solve_triangular(L,b_dig)/len(b_dig)
+los = solve_triangular(L,b_dig,lower = True)
+los = solve_triangular(L.T ,los,lower = False)
 
 
 
 fit = np.array(np.zeros(len(x)))
-fit[:] = (A.T @ los)
+fit[:] = (A @ los)
 
 
 
