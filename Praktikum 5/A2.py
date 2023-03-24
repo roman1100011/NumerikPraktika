@@ -27,11 +27,11 @@ A = A.T
 A_dig = A.T @ A
 b_dig = A.T @ y
 #Cholesky zerlegung
-L = cholesky(A_dig,lower = True)
+Q,R = np.linalg.qr(A)
 
 #     Ly = A^T *b nach y auflösen
-los = solve_triangular(L,b_dig,lower = True)
-los = solve_triangular(L.T ,los,lower = False)
+los = solve_triangular(R,Q.T@y,lower = False)
+
 
 
 
@@ -52,6 +52,6 @@ corrected = lorentz(x[:],los[4],80.3e3,100)
 plt.plot(x, y, label='Original Data')
 plt.plot(x, baseline, label='Estimated Baseline')
 plt.plot(x, corrected, label='estimated Data')
-plt.plot(x, residual, label='Residual')
+#plt.plot(x, residual, label='Residual')
 plt.legend()
 plt.show()
