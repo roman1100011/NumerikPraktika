@@ -12,8 +12,8 @@ def Kronecker(w):
 
 #Lorentz shape function
 def lorentz_shape(x):
-    s_0 = 100
-    x_0 = 0.3 * 10**3
+    s_0 = 100/1000
+    x_0 = 0.3 * 10**3 /1000
     res = 1 / (1 + ((x - x_0) /(s_0/2))**2)
     return res
 
@@ -80,6 +80,7 @@ def QR(A):
 imported_data = np.loadtxt('C:/Users/Samuel Maissen/Offline/Code/NUM/NumerikPraktika/Praktikum 5/data1.txt')
 t,b= imported_data[:,0],imported_data[:,1]
 t = t-80000
+t = t/1000
 
 #---------------------Ausgleichsrechnung--------------------------------------------
 n = 4
@@ -94,6 +95,7 @@ A = A.T
 
 #QR-Zerlegung von Numpy
 Qdata, Rdata = np.linalg.qr(A) 
+print('Condition of R = ',np.linalg.cond(A))
 
 #B-Vektor errechnen, lösen und plotten
 bsolve = Qdata.T@b
@@ -105,6 +107,7 @@ print(x)
 plt.plot(t,b,label='Messdaten')
 plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3+x[n]*lorentz_shape(t),label='Berechnete Daten')
 plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3,label='Polynom 3. Ordnung')
+plt.plot(t,b-(x[0]+x[3]*t+x[2]*t**2+x[1]*t**3),label='Subtrahierte Lorentz-Kurve')
 plt.plot(t,x[n]*lorentz_shape(t),label='Approximierte Lorentz-Kurve')
 plt.grid()
 plt.legend()
@@ -114,6 +117,7 @@ plt.show()
 #Eigene QR-Zerlegung
 Qdata, Rdata = QR(A) 
 Qdata = Qdata.T
+print('Condition of R = ',np.linalg.cond(Qdata@Rdata))
 
 #B-Vektor errechnen, lösen und plotten
 bsolve = Qdata.T@b
@@ -125,6 +129,7 @@ print(x)
 plt.plot(t,b,label='Messdaten')
 plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3+x[n]*lorentz_shape(t),label='Berechnete Daten')
 plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3,label='Polynom 3. Ordnung')
+plt.plot(t,b-(x[0]+x[3]*t+x[2]*t**2+x[1]*t**3),label='Subtrahierte Lorentz-Kurve')
 plt.plot(t,x[n]*lorentz_shape(t),label='Approximierte Lorentz-Kurve')
 plt.grid()
 plt.legend()
