@@ -79,8 +79,6 @@ def QR(A):
 #Aufgabe 2
 imported_data = np.loadtxt('C:/Users/Samuel Maissen/Offline/Code/NUM/NumerikPraktika/Praktikum 5/data1.txt')
 t,b= imported_data[:,0],imported_data[:,1]
-# Estimate the baseline using a polynomial fit
-#baseline = np.polyval(np.polyfit(x, y, deg=3), x) #Hier noch eine lineare ausgleichsrechnung!!!
 t = t-80000
 
 #---------------------Ausgleichsrechnung--------------------------------------------
@@ -93,16 +91,45 @@ for o in range(1,n):
 A[n,] = lorentz_shape(t[:])
 
 A = A.T
-#Die unbekannten sind die Amplitude der Resonanz, und a, b, c und d des Polynom 3. Grades.
-#Bekannt ist:
 
-Qdata1, Rdata1 = np.linalg.qr(A) 
-Qdata2, Rdata2 = QR(A) 
-print(np.round(Rdata2,4))
+#QR-Zerlegung von Numpy
+Qdata, Rdata = np.linalg.qr(A) 
 
-bsolve = Qdata2.T@b
+#B-Vektor errechnen, lösen und plotten
+bsolve = Qdata.T@b
 
-x = sp.linalg.solve_triangular()
+x = sp.linalg.solve_triangular(Rdata,bsolve,unit_diagonal=False)
+print(x)
+
+
+plt.plot(t,b,label='Messdaten')
+plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3+x[n]*lorentz_shape(t),label='Berechnete Daten')
+plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3,label='Polynom 3. Ordnung')
+plt.plot(t,x[n]*lorentz_shape(t),label='Approximierte Lorentz-Kurve')
+plt.grid()
+plt.legend()
+plt.title('Approximation mit QR-Zerlegung von NumPy')
+plt.show()
+
+#Eigene QR-Zerlegung
+Qdata, Rdata = QR(A) 
+Qdata = Qdata.T
+
+#B-Vektor errechnen, lösen und plotten
+bsolve = Qdata.T@b
+
+x = sp.linalg.solve_triangular(Rdata,bsolve,unit_diagonal=False)
+print(x)
+
+
+plt.plot(t,b,label='Messdaten')
+plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3+x[n]*lorentz_shape(t),label='Berechnete Daten')
+plt.plot(t,x[0]+x[3]*t+x[2]*t**2+x[1]*t**3,label='Polynom 3. Ordnung')
+plt.plot(t,x[n]*lorentz_shape(t),label='Approximierte Lorentz-Kurve')
+plt.grid()
+plt.legend()
+plt.title('Approximation mit eigener QR-Zerlegung')
+plt.show()
 
 
 
