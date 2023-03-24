@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.linalg import cholesky
+from scipy.linalg import lu
 from scipy.linalg import solve_triangular
 # Define the Lorentz function
 def lorentz(x, a, x0, sigma):
@@ -25,13 +25,13 @@ A[4,0:]=lorentz(x[:],1,80.3e3,100)
 A = A.T
 #-----A^TA ausrechnen---------------------
 A_dig = A.T @ A
-b_dig = A.T @ y
-#Cholesky zerlegung
-L = cholesky(A_dig,lower = True)
 
+#Cholesky zerlegung
+P,L,U = lu(A_dig,permute_l=False)
+b_dig = (A.T @ y) @ P
 #     Ly = A^T *b nach y auflösen
 los = solve_triangular(L,b_dig,lower = True)
-los = solve_triangular(L.T ,los,lower = False)
+los = solve_triangular(U ,los,lower = False)
 
 
 
