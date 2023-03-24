@@ -34,6 +34,8 @@ for k in range(1,n+1):
 
 # $$A^T * A * y = A^T * b$$
 
+print('Matrix Rang: ',np.linalg.matrix_rank(A))
+
 b = data[:,1]
 Asolve = A.T@A
 bsolve = A.T@b
