@@ -1,5 +1,7 @@
 import numpy as np
 from numpy.linalg import norm
+import matplotlib.pyplot as plt
+import scipy as sp
 
 #Kronecker selber implementieren um Probleme mit Transponieren zu vermeiden
 def Kronecker(w):
@@ -7,6 +9,13 @@ def Kronecker(w):
     for i in range(len(w)):
         res[:,i] = w * w[i]
     return(res)
+
+#Lorentz shape function
+def lorentz_shape(x):
+    s_0 = 100
+    x_0 = 0.3 * 10**3
+    res = 1 / (1 + ((x - x_0) /(s_0/2))**2)
+    return res
 
 #Householder transformation implementieren 
 def HouseholderTransformation(w):
@@ -35,26 +44,69 @@ A = np.array([[-1,  7, -8, -9,  6],
        [-4, -3, -5,  3, -6],
        [ 5,  7,  5, -4, -5],
        [ 4, -6, -8, -2, -5]],dtype=float)
-m,n = A.shape
 
+
+
+def QR(A):
 # Das ganze Array durchlaufen
-Anew = A.copy()
-onesmax = np.eye(m)
-Q = np.eye(m)
+    m,n = A.shape
+    Anew = A.copy()
+    onesmax = np.eye(m)
+    Q = np.eye(m)
 
-for k in range(n):
-    print('Spalte '+str(k+1))
-    y = Anew[k:,k]
-    w = y.T + mysign(y[0]) * np.linalg.norm(y) * e(len(y))
-    Qk = HouseholderTransformation(w)
-    Q = Q@(onesmax + np.pad(Qk,[(k,0),(k,0)]) - np.pad(np.eye(m-k),[(k,0),(k,0)]))
-    Anew[k:,k:] = Qk@Anew[k:,k:]
+    for k in range(n):
+        y = Anew[k:,k]
+        w = y.T + mysign(y[0]) * np.linalg.norm(y) * e(len(y))
+        Qk = HouseholderTransformation(w)
+        Q = Q@(onesmax + np.pad(Qk,[(k,0),(k,0)]) - np.pad(np.eye(m-k),[(k,0),(k,0)]))
+        Anew[k:,k:] = Qk@Anew[k:,k:]
 
-#R = Anew[:n,:n]
-#Q = Q[:n,:]
-R = Anew
-print(np.round(R,4))
-print(Q)
+    R = Anew[:n,:n]
+    Q = Q[:n,:]
 
-print(np.round(Q@R - A,4))
+    #Matrizen zurückgeben
+    return Q,R
+
+#Q1,R1 = QR(A)
+#Q2,R2 = np.linalg.qr(A)
+
+#print(np.round(R1-R2,4))
+
+
+
+
+
+#Aufgabe 2
+imported_data = np.loadtxt('C:/Users/Samuel Maissen/Offline/Code/NUM/NumerikPraktika/Praktikum 5/data1.txt')
+t,b= imported_data[:,0],imported_data[:,1]
+# Estimate the baseline using a polynomial fit
+#baseline = np.polyval(np.polyfit(x, y, deg=3), x) #Hier noch eine lineare ausgleichsrechnung!!!
+t = t-80000
+
+#---------------------Ausgleichsrechnung--------------------------------------------
+n = 4
+A = np.array(np.zeros([n+1,len(t)]))
+
+A[0,]= 1.
+for o in range(1,n):
+    A[o,0:] = np.power(t[:], (4-o))
+A[n,] = lorentz_shape(t[:])
+
+A = A.T
+#Die unbekannten sind die Amplitude der Resonanz, und a, b, c und d des Polynom 3. Grades.
+#Bekannt ist:
+
+Qdata1, Rdata1 = np.linalg.qr(A) 
+Qdata2, Rdata2 = QR(A) 
+print(np.round(Rdata2,4))
+
+bsolve = Qdata2.T@b
+
+x = sp.linalg.solve_triangular()
+
+
+
+
+
+
 
