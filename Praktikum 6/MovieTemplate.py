@@ -11,8 +11,10 @@ ro1.L1= 150
 ro1.L2 = 20
 ro1.Phi1 = 1.0
 ro1.Phi2 = 0.0
-ro1 = ro1.Newton(c)
-print(ro1.cart())
+ro1.pos_c = ro1.cart(ro1)
+diffx = 10
+diffy = 10
+ro1= ro1.get_angeles_ofPoint(ro1,150,0)
 metadata = dict(title='Trajektorie', artist='Your Name',
                 comment='Movie')
 writer = FFMpegWriter(fps=60, metadata=metadata)

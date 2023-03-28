@@ -40,12 +40,7 @@ class Robot:
         self.Phi1 = xn[0]
         self.Phi2 = xn[1]
         return self
-    def Newton(v):
-        pos = self
-        v = v.copy
-        while (np.linalg.norm(v - pos) >= 1e-0):
-            self = self.get_angeles_ofPoint(v[0], v[1])
-        return self
+
 
 
 
