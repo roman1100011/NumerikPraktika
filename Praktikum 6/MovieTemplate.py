@@ -1,8 +1,9 @@
 # Python Template fuer Movie
-
-import matplotlib
-matplotlib.use("Agg")
+import numpy as np
+import matplotlib as plt
+plt.use("Agg")
 from matplotlib.animation import FFMpegWriter
+import Parkt6Berti as ber
 
 metadata = dict(title='Trajektorie', artist='Your Name',
                 comment='Movie')
