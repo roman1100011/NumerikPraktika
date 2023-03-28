@@ -5,6 +5,14 @@ plt.use("Agg")
 from matplotlib.animation import FFMpegWriter
 import Parkt6Berti as ber
 
+c = np.array([150,0])
+ro1 = ber.Robot
+ro1.L1= 150
+ro1.L2 = 20
+ro1.Phi1 = 1.0
+ro1.Phi2 = 0.0
+ro1 = ro1.Newton(c)
+print(ro1.cart())
 metadata = dict(title='Trajektorie', artist='Your Name',
                 comment='Movie')
 writer = FFMpegWriter(fps=60, metadata=metadata)
