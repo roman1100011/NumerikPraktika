@@ -48,6 +48,7 @@ def Taylor_F_varMax(phi1_0,phi2_0,x,y,iterations):
         phi_res[0] -= (2*np.pi)
     return(phi_res)
 
+#Berechnen eines einzelnen Punktes
 """
 point = [3.,0.]
 phi_start = [0.1,0.3]
@@ -65,7 +66,8 @@ line1y = np.linspace(0,p1[1])
 line2y = np.linspace(p1[1],p2[1])
 """
 
-
+#Abfahren einer Trajektorie
+"""
 t = np.linspace(0,4,num=401)
 d = np.divide(1,np.sqrt(17))* np.array([1,-4],dtype=float)
 p = np.array([-2,1],dtype=float)
@@ -86,9 +88,8 @@ midpoint, = ax.plot(0.,0.,'ko')
 plt.title("Animation Test")
 for i in range(len(bahn[:,0])):
     phi_input = Taylor_F(phi_input[0],phi_input[1],bahn[i,0],bahn[i,1])
-    bahn_p_innen[i,0],bahn_p_innen[i,1] = F_inner(Taylor_F(phi_input[0],phi_input[1],bahn[i,0],bahn[i,1])[0])
-    bahn_p[i,0],bahn_p[i,1] = F(*Taylor_F(phi_input[0],phi_input[1],bahn[i,0],bahn[i,1]))
-    diff = np.linalg.norm(phi_input - Taylor_F(phi_input[0],phi_input[1],bahn[i,0],bahn[i,1]))
+    bahn_p_innen[i,0],bahn_p_innen[i,1] = F_inner(phi_input[0])
+    bahn_p[i,0],bahn_p[i,1] = F(*phi_input)
     data1.set_xdata(bahn[i,0])
     data1.set_ydata(bahn[i,1])
     data2.set_xdata([bahn_p_innen[i,0],bahn_p[i,0]])
@@ -96,9 +97,8 @@ for i in range(len(bahn[:,0])):
     data3.set_xdata([0,bahn_p_innen[i,0]])
     data3.set_ydata([0,bahn_p_innen[i,1]])
     figure.canvas.draw()
+#    figure.savefig("figure" + str(i) + ".png" )
     figure.canvas.flush_events()
-    print(i,": Differenz: ",diff)
-
 
 #plt.plot(bahn[:,0],bahn[:,1],'r')
 #plt.plot(bahn_p_innen[0:,0],bahn_p_innen[:,1],'g.')
@@ -107,16 +107,16 @@ plt.grid()
 plt.ylim(-3,3)
 plt.xlim(-3,3)
 plt.show()
-
-
 """
-logsp = [1,5,10,50,100,500,1000,5000,10000,50000,100000,500000]
+
+#Konvergenzverhalten
+"""
+logsp = [1,5,10,50,100,500,1000,5000,10000,50000,100000,500000]  #mit np.logspace hat es nicht funktioniert?
 residuum = np.zeros(len(logsp))
 for i in range(len(logsp)):
     print(logsp[i])
     residuum[i] = np.linalg.norm(Taylor_F_varMax(0.1,0.1,3.,0.,logsp[i]))
-"""
-"""
+
 print(residuum)
 plt.plot(logsp,residuum)
 plt.xscale("log")
