@@ -1,8 +1,10 @@
 # Python Template fuer Movie
 
 import numpy as np
-import matplotlib as plt
-plt.use("Agg")
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+matplotlib.use("Agg")
 from matplotlib.animation import FFMpegWriter
 
 metadata = dict(title='Trajektorie', artist='Your Name',
@@ -39,7 +41,7 @@ plt.ylabel('y')
 #       array([[0.        , 0.        ],
 #              [0.58856217, 1.91143783],
 #              [1.        , 1.        ]])
-with writer.saving(fig, 'Trajektorie.mp4',400):
+with writer.saving(fig,'trajektorie.mp4',400):
     for s in si:
         l1.set_data(*PG(*s).T)
         l2.set_data(*PG(*s).T)
