@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import simpy as sp
+from scipy.misc import derivative
+from scipy.linalg import qr, solve_triangular
 
 # ------------ Implementation des Modells und dessen analyitischer Lösung --------------
 # Implementation der analytischen Lösung
@@ -32,31 +33,34 @@ def explizitEuler(xend, h, y0, f):
     return np.array(x), np.array(y)
 
 
-# # ------------ Definition des impliziten Eulerverfahrens -------------------------------
-# def implizitEuler(xend, h, y0, f, df):
-#     x = [0.]
-#     y = [y0]
-#
-#     # Verfahrensfunktion für implizit Euler
-#     def G(s, xk, yk):
-#         return s - yk - h * f(xk, s)    # stimmt hier X_k im Funktionsaufruf? Gemäss Praktikumsbeschrieb müsste es X_k+1 sein....
-#
-#     # Partielle Ableitung nach s der Verfahrensfunktion
-#     def dG(s, xk, yk):
-#         return sp.diff(G,s)    # passt das so, wenn ich hier einfach mit simpy ableite?
-#
-#     def newton(s, xk, yk, tol=1e-12, maxIter=20):
-#         k=0
-#         delta = 10*tol
-#         while np.abs(delta) > tol and k < maxIter:
-#             delta = #<<snipp>>
-#             s -= delta
-#             k += 1
-#         return s
-#     while x[-1] < xend-h/2:
-#         y.append(newton(y[-1],x[-1],y[-1]))
-#         x.append(x[-1]+h)
-#     return np.array(x), np.array(y)
+# ------------ Definition des impliziten Eulerverfahrens -------------------------------
+def implizitEuler(xend, h, y0, f dg):
+    x = [0.]
+    y = [y0]
+
+    # Verfahrensfunktion für implizit Euler
+    def G(s, xk, yk):
+        return s - yk - h * f(xk, s)    # stimmt hier X_k im Funktionsaufruf? Gemäss Praktikumsbeschrieb müsste es X_k+1 sein....
+
+    # Partielle Ableitung nach s der Verfahrensfunktion
+    def dG(s, xk, yk):
+        return derivative(G, s)   # passt das so, wenn ich hier einfach mit scipy ableite?
+
+    def newton(s, xk, yk, tol=1e-12, maxIter=20):
+        k=0
+        delta = 10*tol
+        while np.abs(delta) > tol and k < maxIter:
+            A = dG(x)
+            b = G(x)
+            q, r = np.linalg.qr(A)
+            delta = solve_triangular(r, q.T @ b)
+            s -= delta
+            k += 1
+        return s
+    while x[-1] < xend-h/2:
+        y.append(newton(y[-1],x[-1],y[-1]))
+        x.append(x[-1]+h)
+    return np.array(x), np.array(y)
 
 
 
@@ -65,7 +69,7 @@ n = 10**np.linspace(2,5)
 hs = 2/n
 err = []
 for h in hs:
-    x, y = explizitEuler(2,h,1,f)
+    x, y = implizitEuler(2,h,1,f)
     err.append(np.linalg.norm(y-ya(x),np.inf)) # ya(x) ist die exakte Lösung
 
 plt.loglog(hs,err,'-')
