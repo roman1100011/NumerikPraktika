@@ -9,7 +9,7 @@ def ya(x):
     return np.exp(-4*x)
 
 def f(x,y):
-    return -4*y     # stimmt das hier so?
+    return -4*y
 
 def df(x,y):
     return -4
@@ -36,47 +36,72 @@ def explizitEuler(xend, h, y0, f):
     return np.array(x), np.array(y)
 
 
-# ------------ Definition des impliziten Eulerverfahrens -------------------------------
 def implizitEuler(xend, h, y0, f, df):
     x = [0.]
     y = [y0]
 
     # Verfahrensfunktion für implizit Euler
     def G(s, xk, yk):
-        return s - yk - h * f(xk, s)    # stimmt hier X_k im Funktionsaufruf? Gemäss Praktikumsbeschrieb müsste es X_k+1 sein....
+        return s - yk - h * f(xk + h, s)
 
     # Partielle Ableitung nach s der Verfahrensfunktion
     def dG(s, xk, yk):
-        return 1 - h * df(xk, s)   # passt das so, wenn ich hier einfach mit scipy ableite?
+        return 1 - h * df(xk + h, s)
 
     def newton(s, xk, yk, tol=1e-12, maxIter=20):
-        k=0
-        delta = 10*tol
+        k = 0
+        delta = 10 * tol
         while np.abs(delta) > tol and k < maxIter:
-            A = dG(s, xk, yk)
-            b = G(s, xk, yk)
-            q, r = np.linalg.qr(A)
-            delta = solve_triangular(r, q.T @ b)
+            delta = G(s, xk, yk) / dG(s, xk, yk)
             s -= delta
             k += 1
         return s
-    while x[-1] < xend-h/2:
-        y.append(newton(y[-1],x[-1],y[-1]))
-        x.append(x[-1]+h)
+
+    while x[-1] < xend - h / 2:
+        y.append(newton(y[-1], x[-1], y[-1], tol=1e-12, maxIter=20))
+        x.append(x[-1] + h)
+
     return np.array(x), np.array(y)
 
 
 
-# ------------ Kontrolle der Konvergenzordnung -------------------------------------
-n = 10**np.linspace(2,5)
-hs = 2/n
-err = []
-for h in hs:
-    x, y = implizitEuler(2,h,1,f, df)
-    err.append(np.linalg.norm(y-ya(x),np.inf)) # ya(x) ist die exakte Lösung
 
-plt.loglog(hs,err,'-')
+# ------------ Berechnung des absoluten Fehlers -------------------------------------
+xp = np.linspace(0,2,100)
+xe, ye = explizitEuler(2, 0.01, 1, f)
+xi, yi = implizitEuler(2, 0.01, 1, f, df)
+
+plt.figure('absoluter Fehler')
+plt.plot(xp, ya(xp),'-', label='analytische Lösung')
+plt.plot(xe, ye,'-', label='explizite Lösung')
+plt.plot(xi, yi,'-', label='implizite Lösung')
+plt.plot(xe, np.abs(ye - ya(xe)),'-', label='Fehler expl. Lösung')
+plt.plot(xe, np.abs(yi - ya(xi)),'-', label='Fehler impl. Lösung')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# ------------ Kontrolle der Konvergenzordnung -------------------------------------
+n = 10**np.linspace(1,5)
+hs = 2/n
+err_exp = []
+err_imp = []
+for h in hs:
+    xe, ye = explizitEuler(2, h, 1, f)
+    err_exp.append(np.linalg.norm(ye - ya(xe), np.inf))  # ya(xe) ist die exakte Lösung am Punkt xe
+
+    xi, yi = implizitEuler(2,h,1,f,df)
+    err_imp.append(np.linalg.norm(yi-ya(xi),np.inf)) # ya(xi) ist die exakte Lösung am Punkt xi
+
+
+plt.figure('Konvergenzordnung')
+plt.loglog(hs,err_exp,'-', label='explizit')
+plt.loglog(hs,err_imp,'-', label='implizit')
 plt.xlabel('h')
 plt.ylabel(r'$\max_k \|e(x_k,h)\|$')
+plt.legend()
 plt.grid()
 plt.show()
