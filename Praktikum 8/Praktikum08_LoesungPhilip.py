@@ -1,7 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.misc import derivative
-from scipy.linalg import qr, solve_triangular
 
 # ------------ Implementation des Modells und dessen analyitischer Lösung --------------
 # Implementation der analytischen Lösung
@@ -13,7 +11,6 @@ def f(x,y):
 
 def df(x,y):
     return -4
-
 
 # ------------ Definition des expliziten Eulerverfahrens -------------------------------
 def explizitEuler(xend, h, y0, f):
@@ -67,41 +64,46 @@ def implizitEuler(xend, h, y0, f, df):
 
 
 # ------------ Berechnung des absoluten Fehlers -------------------------------------
-xp = np.linspace(0,2,100)
-xe, ye = explizitEuler(2, 0.01, 1, f)
-xi, yi = implizitEuler(2, 0.01, 1, f, df)
+def absError(f, df, ya):
+    xp = np.linspace(0,2,100)
+    xe, ye = explizitEuler(2, 0.01, 1, f)
+    xi, yi = implizitEuler(2, 0.01, 1, f, df)
 
-plt.figure('absoluter Fehler')
-plt.plot(xp, ya(xp),'-', label='analytische Lösung')
-plt.plot(xe, ye,'-', label='explizite Lösung')
-plt.plot(xi, yi,'-', label='implizite Lösung')
-plt.plot(xe, np.abs(ye - ya(xe)),'-', label='Fehler expl. Lösung')
-plt.plot(xe, np.abs(yi - ya(xi)),'-', label='Fehler impl. Lösung')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.legend()
-plt.grid()
-plt.show()
+    plt.figure('absoluter Fehler')
+    plt.plot(xp, ya(xp),'-', label='analytische Lösung')
+    plt.plot(xe, ye,'-', label='explizite Lösung')
+    plt.plot(xi, yi,'-', label='implizite Lösung')
+    plt.plot(xe, np.abs(ye - ya(xe)),'-', label='Fehler expl. Lösung')
+    plt.plot(xe, np.abs(yi - ya(xi)),'-', label='Fehler impl. Lösung')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
+absError(f, df, ya)
 
 # ------------ Kontrolle der Konvergenzordnung -------------------------------------
-n = 10**np.linspace(1,5)
-hs = 2/n
-err_exp = []
-err_imp = []
-for h in hs:
-    xe, ye = explizitEuler(2, h, 1, f)
-    err_exp.append(np.linalg.norm(ye - ya(xe), np.inf))  # ya(xe) ist die exakte Lösung am Punkt xe
 
-    xi, yi = implizitEuler(2,h,1,f,df)
-    err_imp.append(np.linalg.norm(yi-ya(xi),np.inf)) # ya(xi) ist die exakte Lösung am Punkt xi
+def Konvergenzordnungskontrolle(f, df, ya):
+    n = 10**np.linspace(1,5)
+    hs = 2/n
+    err_exp = []
+    err_imp = []
+    for h in hs:
+        xe, ye = explizitEuler(2, h, 1, f)
+        err_exp.append(np.linalg.norm(ye - ya(xe), np.inf))  # ya(xe) ist die exakte Lösung am Punkt xe
 
+        xi, yi = implizitEuler(2,h,1,f,df)
+        err_imp.append(np.linalg.norm(yi-ya(xi),np.inf)) # ya(xi) ist die exakte Lösung am Punkt xi
 
-plt.figure('Konvergenzordnung')
-plt.loglog(hs,err_exp,'-', label='explizit')
-plt.loglog(hs,err_imp,'-', label='implizit')
-plt.xlabel('h')
-plt.ylabel(r'$\max_k \|e(x_k,h)\|$')
-plt.legend()
-plt.grid()
-plt.show()
+    plt.figure('Konvergenzordnung')
+    plt.loglog(hs,err_exp,'-', label='explizit')
+    plt.loglog(hs,err_imp,'-', label='implizit')
+    plt.xlabel('h')
+    plt.ylabel(r'$\max_k \|e(x_k,h)\|$')
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+Konvergenzordnungskontrolle(f, df, ya)
