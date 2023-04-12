@@ -11,6 +11,9 @@ def ya(x):
 def f(x,y):
     return -4*y     # stimmt das hier so?
 
+def df(x,y):
+    return -4
+
 
 # ------------ Definition des expliziten Eulerverfahrens -------------------------------
 def explizitEuler(xend, h, y0, f):
@@ -34,7 +37,7 @@ def explizitEuler(xend, h, y0, f):
 
 
 # ------------ Definition des impliziten Eulerverfahrens -------------------------------
-def implizitEuler(xend, h, y0, f dg):
+def implizitEuler(xend, h, y0, f, df):
     x = [0.]
     y = [y0]
 
@@ -44,14 +47,14 @@ def implizitEuler(xend, h, y0, f dg):
 
     # Partielle Ableitung nach s der Verfahrensfunktion
     def dG(s, xk, yk):
-        return derivative(G, s)   # passt das so, wenn ich hier einfach mit scipy ableite?
+        return 1 - h * df(xk, s)   # passt das so, wenn ich hier einfach mit scipy ableite?
 
     def newton(s, xk, yk, tol=1e-12, maxIter=20):
         k=0
         delta = 10*tol
         while np.abs(delta) > tol and k < maxIter:
-            A = dG(x)
-            b = G(x)
+            A = dG(s, xk, yk)
+            b = G(s, xk, yk)
             q, r = np.linalg.qr(A)
             delta = solve_triangular(r, q.T @ b)
             s -= delta
@@ -69,7 +72,7 @@ n = 10**np.linspace(2,5)
 hs = 2/n
 err = []
 for h in hs:
-    x, y = implizitEuler(2,h,1,f)
+    x, y = implizitEuler(2,h,1,f, df)
     err.append(np.linalg.norm(y-ya(x),np.inf)) # ya(x) ist die exakte Lösung
 
 plt.loglog(hs,err,'-')
