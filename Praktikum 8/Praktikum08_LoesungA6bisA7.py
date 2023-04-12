@@ -30,7 +30,6 @@ plt.grid()
 plt.show()
 
 
-
 # ------------ absoluten Fehler für verschiedene Schrittweiten berechnen und darstellen --------------
 hs = []
 for j in np.linspace(1,8,8):
@@ -54,3 +53,21 @@ plt.grid()
 plt.show()
 
 
+
+
+# ------------ Lösung im Richtungsfeld visualisieren, für N=3^8 --------------
+h = 2/(3**8)
+xe, ye = explizitEuler(2, h, 4, f)
+xi, yi = implizitEuler(2, h, 4, f, df)
+xp = np.linspace(0,2,100)
+plt.figure('Lösung im Richtungsfeld')
+plt.plot(xp, ya(xp),'-', label='analytische Lösung')
+plt.plot(xe, ye,'-', label='explizite Lösung')
+plt.plot(xi, yi,'-', label='implizite Lösung')
+xq,yq = np.meshgrid(np.linspace(0,2,int(2/.05)),np.linspace(np.min(ya(xp)),np.max(ya(xp)),10))
+plt.quiver(xq,yq,np.ones_like(xq),f(xq,yq),angles='xy')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid()
+plt.show()

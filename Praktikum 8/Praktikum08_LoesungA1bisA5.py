@@ -81,7 +81,7 @@ def absError(f, df, ya):
     plt.grid()
     plt.show()
 
-#absError(f, df, ya)
+absError(f, df, ya)
 
 # ------------ Kontrolle der Konvergenzordnung -------------------------------------
 
@@ -106,4 +106,4 @@ def Konvergenzordnungskontrolle(f, df, ya):
     plt.grid()
     plt.show()
 
-#Konvergenzordnungskontrolle(f, df, ya)
+Konvergenzordnungskontrolle(f, df, ya)
