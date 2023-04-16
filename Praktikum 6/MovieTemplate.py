@@ -1,6 +1,9 @@
 # Python Template fuer Movie
 
+import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 from matplotlib.animation import FFMpegWriter
 
@@ -15,7 +18,14 @@ l2, = plt.plot([], [],'o')
 # p: Funktion zur Berechnung der Punkte auf der Trajektorie
 # ti: wird auch für die Berechnung der Winkel benutzt
 ti = np.linspace(0,4,int(4/.01+1))
-plt.plot(*np.array([p(tii) for tii in ti]).T)
+#plt.plot(*np.array([p(tii) for tii in ti]).T)
+
+phitest = np.linspace(0,3)
+
+def f(phi1,phi2):
+    l1 = 2
+    l2 = 1
+    v = [l1**2+l2**2-2*l1*l2*np.cos(np.pi-phi2)*np.cos(phi1+phi2),l1**2+l2**2-2*l1*l2*np.cos(np.pi-phi2)*np.sin(phi1+phi2)]
 
 plt.xlim(-3,3)
 plt.ylim(-3,3)
@@ -31,7 +41,7 @@ plt.ylabel('y')
 #       array([[0.        , 0.        ],
 #              [0.58856217, 1.91143783],
 #              [1.        , 1.        ]])
-with writer.saving(fig, 'Trajektorie.mp4',400):
+with writer.saving(fig,'trajektorie.mp4',400):
     for s in si:
         l1.set_data(*PG(*s).T)
         l2.set_data(*PG(*s).T)
