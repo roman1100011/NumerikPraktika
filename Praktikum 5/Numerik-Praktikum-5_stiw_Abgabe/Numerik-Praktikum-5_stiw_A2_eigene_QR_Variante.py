@@ -12,8 +12,8 @@ def Kronecker(w):
 
 #Lorentz shape function
 def lorentz_shape(x):
-    s_0 = 100/1000
-    x_0 = 0.3 * 10**3 /1000
+    s_0 = 0.2
+    x_0 = 0.35
     res = 1 / (1 + ((x - x_0) /(s_0/2))**2)
     return res
 
@@ -77,7 +77,7 @@ def QR(A):
 
 
 #Aufgabe 2
-imported_data = np.loadtxt('C:/Users/Samuel Maissen/Offline/Code/NUM/NumerikPraktika/Praktikum 5/data1.txt')
+imported_data = np.loadtxt("Praktikum 7\dataP7.txt")
 t,b= imported_data[:,0],imported_data[:,1]
 t = t-80000
 t = t/1000
