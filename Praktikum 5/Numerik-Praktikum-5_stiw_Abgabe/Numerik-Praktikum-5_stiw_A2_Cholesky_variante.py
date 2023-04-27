@@ -10,7 +10,7 @@ def lorentz(x, a, x0, sigma):
 
 
 
-imported_data = np.loadtxt("data.txt")
+imported_data = np.loadtxt("Praktikum 7\dataP7.txt")
 x,y= imported_data[:,0],imported_data[:,1]
 
 
