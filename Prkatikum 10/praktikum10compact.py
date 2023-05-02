@@ -125,7 +125,6 @@ plt.show()
 n = 3**np.linspace(1,8,num=8)
 hs = 2/n
 
-print(hs)
 
 # für die implizite Mittelpunktregel
 a = np.array([[0.5]])
@@ -153,7 +152,7 @@ for h in hs:
 plt.loglog(hs,errm,marker='*',label='implizite Mittelpunktregel')
 plt.loglog(hs,errt,marker='*',label='implizite Trapezregel')
 plt.xlabel('h')
-plt.ylabel('Fehler')
+plt.ylabel('Fehler and er Endstelle')
 plt.legend()
 plt.title('Konvergenz')
 plt.grid()
