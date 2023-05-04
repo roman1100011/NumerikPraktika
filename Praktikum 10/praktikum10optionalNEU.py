@@ -70,35 +70,68 @@ def Runge_Kutta_5(xend, h, y0, f):
 
 # ------------ Berechnung des absoluten Fehlers -------------------------------------
 def absError(f, ya, y0):
-    h_plot = 0.1
-    xend_plot = 1
+    xend = 2
     y0_plot = y0
-    xp = np.linspace(0, xend_plot, 100)
-    xrk4, yrk4 = Runge_Kutta_4(xend_plot, h_plot, y0_plot, f)
-    xrk5, yrk5 = Runge_Kutta_5(xend_plot, h_plot, y0_plot, f)
+    xp = np.linspace(0, xend, 100)
 
-    plt.figure('Runge-Kutta Verfahren')
-    plt.title('Runge-Kutta Verfahren')
-    plt.plot(xp, ya(xp), '-', label='analytische Lösung')
-    plt.plot(xrk4, yrk4, '--', label='Runge-Kutta 4. Ordnung')
-    plt.plot(xrk5, yrk5, '--', label='Runge Kutta 5. Ordnung')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.legend()
-    plt.grid()
-    plt.show()
+    h = []
+    err_rk4 = []
+    err_rk5 = []
+    for j in range(0, 12, 1):
+        hnew = 2 / (2 ** ((j+1) - 1))
+
+        xrk4, yrk4 = Runge_Kutta_4(xend, hnew, y0_plot, f)
+        xrk5, yrk5 = Runge_Kutta_5(xend, hnew, y0_plot, f)
+
+        h.append(hnew)
+        err_rk4.append(abs(ya(xend) - yrk4[-1]))
+        err_rk5.append(abs(ya(xend) - yrk5[-1]))
+
 
     plt.figure('Fehler Runge-Kutta Verfahren')
-    plt.title('Fehler Runge-Kutta Verfahren')
-    plt.plot(xrk4, np.abs(yrk4 - ya(xrk4)), 'o', label='Fehler Runge-Kutta 4. Ordnung')
-    plt.plot(xrk5, np.abs(yrk5 - ya(xrk5)), '.', label='Fehler Runge-Kutta 5. Ordnung')
-    print(max(np.abs(yrk4 - ya(xrk4))))
-    print(max(np.abs(yrk5 - ya(xrk5))))
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.title('Fehler Runge-Kutta Verfahren bei verschiedenen Schrittweiten')
+    plt.loglog(h, err_rk4, 'o', label='Fehler Runge-Kutta 4. Ordnung')
+    plt.loglog(h, err_rk5, 'o', label='Fehler Runge-Kutta 5. Ordnung')
+    print(max(err_rk4))
+    print(max(err_rk5))
+    plt.xlabel('h')
+    plt.ylabel('absoluter Fehler')
     plt.legend()
     plt.grid()
     plt.show()
 
+    return err_rk4, err_rk5
 
-absError(f, ya, y0)
+
+
+err_rk4, err_rk5 = absError(f, ya, y0)
+
+
+
+
+
+
+    # plt.figure('Runge-Kutta Verfahren')
+    # plt.title('Runge-Kutta Verfahren')
+    # plt.plot(xp, ya(xp), '-', label='analytische Lösung')
+    # plt.plot(xrk4, yrk4, '--', label='Runge-Kutta 4. Ordnung')
+    # plt.plot(xrk5, yrk5, '--', label='Runge Kutta 5. Ordnung')
+    # plt.xlabel('x')
+    # plt.ylabel('y')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    #
+    # plt.figure('Fehler Runge-Kutta Verfahren')
+    # plt.title('Fehler Runge-Kutta Verfahren')
+    # plt.loglog(xrk4, np.abs(yrk4 - ya(xrk4)), 'o', label='Fehler Runge-Kutta 4. Ordnung')
+    # plt.loglog(xrk5, np.abs(yrk5 - ya(xrk5)), '.', label='Fehler Runge-Kutta 5. Ordnung')
+    # print(max(np.abs(yrk4 - ya(xrk4))))
+    # print(max(np.abs(yrk5 - ya(xrk5))))
+    # plt.xlabel('x')
+    # plt.ylabel('y')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
+
