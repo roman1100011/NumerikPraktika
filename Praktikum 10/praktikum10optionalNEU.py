@@ -25,8 +25,8 @@ def Runge_Kutta(a, b, c, xend, h, y0, f):
     while x[-1] < xend-h/2:
         # Runge-Kutta Verfahren Schritt
         for i in range(s):
-            r[i] = f(xalt + c[i] * h, yalt + h * sum(np.multiply(a[i],r)))
-        yneu = yalt + h * sum(np.multiply(b,r))
+            r[i] = f(xalt + c[i] * h, yalt + h * sum(a[i]*r))
+        yneu = yalt + h * sum(b*r)
         xneu = xalt + h
 
         # Speichern des Resultats
@@ -108,14 +108,7 @@ err_rk4, err_rk5 = absError(f, ya, y0)
 
 
 # ------------ Definition RK45 Verfahren mit Butcher Tableau -------------------------------
-def Runge_Kutta_45(x_end, h, y0, f, tol):
-    x = [0.]
-    y = [y0]
-    x_alt = 0
-    y_alt = y0
-    h_min = 1e-12
-    h_max = 1e2*h
-    s = 6
+def Runge_Kutta_45(xend, h, y0, f, tol):
     # Implementation des Butcher-Tableaus
     a = np.array([[0,       0,       0,      0,     0,    0],
                   [2/9,     0,       0,      0,     0,    0],
@@ -123,61 +116,64 @@ def Runge_Kutta_45(x_end, h, y0, f, tol):
                   [69/128, -243/128, 135/64, 0,     0,    0],
                   [-17/12,  27/4,   -27/5,   16/15, 0,    0],
                   [65/432, -5/16,    13/16,  4/27,  5/144,0]])
-    b4 = np.array([25/216, 0, 1408/2565, 2197/4104, -1/5, 0])
-    b5 = np.array([16/135, 0, 6656/12825, 28561/56430, -9/50, 2/55])
+    b4 = np.array([1/9, 0, 9/20, 16/45, 1/12, 0])
+    b5 = np.array([47/450, 0, 12/25, 32/225, 1/30, 6/25])
     c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
 
-    while x[-1] < x_end - h/2:
-        # Anpassen der Schrittweite:
-        r = np.zeros(s)
-        h = min(h_max, max(h_min, h))
-        while True:
-            # 4. und 5. Ordnung Runge-Kutta berechnen
-            for i in range(s):
-                r[i] = f(x_alt + c[i] * h, y_alt + h * np.sum(a[i] * r))
-            y4 = y_alt + h * np.sum(b4 * r)
-            y5 = y_alt + h * np.sum(b5 * r)
+    x = [0.]
+    y = [y0]
+    xalt = 0
+    yalt = y0
+    r = np.zeros(6)
 
-            # Diskretisierungsfehler abschätzen
-            e = abs(y5 - y4)
+    while x[-1] < xend - h/2:
+        # Schritt mit RK4
+        r4 = np.zeros(6)
+        for i in range(6):
+            r4[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r4))
+        y4 = yalt + h*np.sum(b4*r4)
 
-            # Schrittweitensteuerung
-            if e == 0:
-                # Division durch 0 abfangen
-                h_new = h_max
-                break
-            h_new = 0.9 * h * (tol / e) ** 0.2
-            if h_new < h_min:
-                h = h_min
-            elif h_new > h_max:
-                h = h_max
-            else:
-                h = h_new
-                break
+        # Schritt mit RK5
+        r5 = np.zeros(6)
+        for i in range(6):
+            r5[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r5))
+        y5 = yalt + h*np.sum(b5*r5)
 
-        # Iterationsstatus updaten
-        y_neu = y5
-        x_neu = x_alt + h
+        # Fehler abschätzen
+        Delta = np.abs(y4 - y5)
+        Delta_norm = np.linalg.norm(Delta)
 
-        # Resultat abspeichern und als alten Wert für nächsten Schleifendurchlauf festlegen
-        y.append(y_neu)
-        x.append(x_neu)
-        y_alt = y_neu
-        x_alt = x_neu
+        # Schrittweite anpassen
+        if Delta < tol/20:
+            h_neu = 2*h
+        elif Delta <= tol:
+            h_neu = h
+        else:
+            h_neu = h/2
+            h = h_neu
+            continue  # y_{k+1} nicht aktzeptieren und wiederholen mit halber Schrittweite
+
+        # Resultate speichern
+        x.append(xalt + h)
+        y.append(y5)
+        xalt = x[-1]
+        yalt = y[-1]
+        r = r5
+        h = h_neu
 
     return np.array(x), np.array(y)
 
 
 
-
+# ------------ Lösen des Modellproblems mit dem RK45-Verfahren für versch. Toleranzen -------------------------------
 for j in range(1, 13, 1):
+    # Toleranz festlegen und RK45 mit dieser Toleranz aufrufen
     tol = 10**-j
-
     xrk45, yrk45 = Runge_Kutta_45(2, 0.1, y0, f, tol)
 
+    # Maximalen absoluten Fehler berechnen und ausgeben
     max_err = 0
     for k in range(len(xrk45)):
         max_err = max(max_err, abs(ya(xrk45[k]) - yrk45[k]))
-
     print(max_err)
 
