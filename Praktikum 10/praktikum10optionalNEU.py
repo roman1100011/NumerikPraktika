@@ -13,7 +13,7 @@ def df(x,y):
 
 y0 = -4
 
-# ------------ Definition Runge-Kutta Verfahren explizit -------------------------------
+# ------------ Definition allgemeines Runge-Kutta Verfahren explizit -------------------------------
 def Runge_Kutta(a, b, c, xend, h, y0, f):
     x = [0.]
     y = [y0]
@@ -42,6 +42,7 @@ def Runge_Kutta(a, b, c, xend, h, y0, f):
 
 # ------------ Definition Runge-Kutta Verfahren explizit mit Butcher Tableau 4. Ordnung -------------------------------
 def Runge_Kutta_4(xend, h, y0, f):
+    # Implementation des Butcher-Tableaus
     a = np.array([[0,       0,       0,      0,     0,    0],
                   [2/9,     0,       0,      0,     0,    0],
                   [1/12,    1/4,     0,      0,     0,    0],
@@ -56,6 +57,7 @@ def Runge_Kutta_4(xend, h, y0, f):
 
 # ------------ Definition Runge-Kutta Verfahren explizit mit Butcher Tableau 5. Ordnung -------------------------------
 def Runge_Kutta_5(xend, h, y0, f):
+    # Implementation des Butcher-Tableaus
     a = np.array([[0,       0,       0,      0,     0,    0],
                   [2/9,     0,       0,      0,     0,    0],
                   [1/12,    1/4,     0,      0,     0,    0],
@@ -68,7 +70,7 @@ def Runge_Kutta_5(xend, h, y0, f):
     return Runge_Kutta(a, b, c, xend, h, y0, f)
 
 
-# ------------ Berechnung des absoluten Fehlers -------------------------------------
+# ------------ Berechnung und Darstellung des absoluten Fehlers -------------------------------------
 def absError(f, ya, y0):
     xend = 2
 
@@ -106,7 +108,7 @@ err_rk4, err_rk5 = absError(f, ya, y0)
 
 
 # ------------ Definition RK45 Verfahren mit Butcher Tableau -------------------------------
-def Runge_Kutta_45(x_end, h, y0, f, atol):
+def Runge_Kutta_45(x_end, h, y0, f, tol):
     x = [0.]
     y = [y0]
     x_alt = 0
@@ -114,6 +116,7 @@ def Runge_Kutta_45(x_end, h, y0, f, atol):
     h_min = 1e-12
     h_max = 1e2*h
     s = 6
+    # Implementation des Butcher-Tableaus
     a = np.array([[0,       0,       0,      0,     0,    0],
                   [2/9,     0,       0,      0,     0,    0],
                   [1/12,    1/4,     0,      0,     0,    0],
@@ -125,25 +128,25 @@ def Runge_Kutta_45(x_end, h, y0, f, atol):
     c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
 
     while x[-1] < x_end - h/2:
-        # Step size adjustment
+        # Anpassen der Schrittweite:
         r = np.zeros(s)
         h = min(h_max, max(h_min, h))
         while True:
-            # Compute 4th order Runge-Kutta and 5th order Runge-Kutta
+            # 4. und 5. Ordnung Runge-Kutta berechnen
             for i in range(s):
                 r[i] = f(x_alt + c[i] * h, y_alt + h * np.sum(a[i] * r))
             y4 = y_alt + h * np.sum(b4 * r)
             y5 = y_alt + h * np.sum(b5 * r)
 
-            # Compute error estimate
+            # Diskretisierungsfehler abschätzen
             e = abs(y5 - y4)
 
-            # Step size control
+            # Schrittweitensteuerung
             if e == 0:
-                # Prevent division by zero
+                # Division durch 0 abfangen
                 h_new = h_max
                 break
-            h_new = 0.9 * h * (atol / e) ** 0.2
+            h_new = 0.9 * h * (tol / e) ** 0.2
             if h_new < h_min:
                 h = h_min
             elif h_new > h_max:
@@ -152,14 +155,13 @@ def Runge_Kutta_45(x_end, h, y0, f, atol):
                 h = h_new
                 break
 
-        # Update state
+        # Iterationsstatus updaten
         y_neu = y5
         x_neu = x_alt + h
 
-        # Store result
+        # Resultat abspeichern und als alten Wert für nächsten Schleifendurchlauf festlegen
         y.append(y_neu)
         x.append(x_neu)
-
         y_alt = y_neu
         x_alt = x_neu
 
