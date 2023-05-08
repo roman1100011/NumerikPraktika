@@ -106,64 +106,67 @@ err_rk4, err_rk5 = absError(f, ya, y0)
 
 
 # ------------ Definition RK45 Verfahren mit Butcher Tableau -------------------------------
-def Runge_Kutta_45(xend, h, y0, f, tol=1e-6, hmin=1e-8, hmax=1.0):
+def Runge_Kutta_45(x_end, h, y0, f, atol):
+    x = [0.]
+    y = [y0]
+    x_alt = 0
+    y_alt = y0
+    h_min = 1e-12
+    h_max = 1e2*h
+    s = 6
     a = np.array([[0,       0,       0,      0,     0,    0],
                   [2/9,     0,       0,      0,     0,    0],
                   [1/12,    1/4,     0,      0,     0,    0],
                   [69/128, -243/128, 135/64, 0,     0,    0],
                   [-17/12,  27/4,   -27/5,   16/15, 0,    0],
                   [65/432, -5/16,    13/16,  4/27,  5/144,0]])
-    b4 = np.array([1/9, 0, 9/20, 16/45, 1/12, 0])
-    b5 = np.array([47/450, 0, 12/25, 32/225, 1/30, 6/25])
+    b4 = np.array([25/216, 0, 1408/2565, 2197/4104, -1/5, 0])
+    b5 = np.array([16/135, 0, 6656/12825, 28561/56430, -9/50, 2/55])
     c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
 
-    x = [0.]
-    y = [y0]
-    #h = min(hmax, h)
-    #h = max(hmin, h)
+    while x[-1] < x_end - h/2:
+        # Step size adjustment
+        r = np.zeros(s)
+        h = min(h_max, max(h_min, h))
+        while True:
+            # Compute 4th order Runge-Kutta and 5th order Runge-Kutta
+            for i in range(s):
+                r[i] = f(x_alt + c[i] * h, y_alt + h * np.sum(a[i] * r))
+            y4 = y_alt + h * np.sum(b4 * r)
+            y5 = y_alt + h * np.sum(b5 * r)
 
-    while x[-1] < xend - h / 2:
-        # Schrittweite anpassen
-        if xend - x[-1] < 1.5 * h:
-            h = xend - x[-1]
+            # Compute error estimate
+            e = abs(y5 - y4)
 
-        # 4. Ordnung
-        k4 = np.zeros(len(a))
-        for i in range(len(a)):
-            k4[i] = f(x[-1] + c[i] * h, y[-1] + h * sum(a[i, :len(a[i])] * k4[:len(a[i])]))
+            # Step size control
+            if e == 0:
+                # Prevent division by zero
+                h_new = h_max
+                break
+            h_new = 0.9 * h * (atol / e) ** 0.2
+            if h_new < h_min:
+                h = h_min
+            elif h_new > h_max:
+                h = h_max
+            else:
+                h = h_new
+                break
 
-        y4 = y[-1] + h * sum(b4 * k4)
+        # Update state
+        y_neu = y5
+        x_neu = x_alt + h
 
-        # 5. Ordnung
-        k5 = np.zeros(len(a))
-        for i in range(len(a)):
-            k5[i] = f(x[-1] + c[i] * h, y[-1] + h * sum(a[i, :len(a[i])] * k5[:len(a[i])]))
+        # Store result
+        y.append(y_neu)
+        x.append(x_neu)
 
-        y5 = y[-1] + h * sum(b5 * k5)
+        y_alt = y_neu
+        x_alt = x_neu
 
-        # Fehlerabschätzung
-        err = np.abs(y5 - y4) / h
-
-        # Schrittweite anpassen
-        if err < tol:
-            yneu = y5
-            xneu = x[-1] + h
-            y.append(yneu)
-            x.append(xneu)
-        else:
-            h *= 0.9 * (tol / err) ** 0.25
-            h = min(hmax, h)
-            continue
-
-        # Schrittweite anpassen
-        if err == 0.0:
-            h *= 2.0
-        else:
-            h *= 0.9 * (tol / err) ** 0.2
-
-        h = min(hmax, h)
-        h = max(hmin, h)
     return np.array(x), np.array(y)
+
+
+
 
 for j in range(1, 13, 1):
     tol = 10**-j
