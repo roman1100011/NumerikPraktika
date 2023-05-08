@@ -1,121 +1,178 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.linalg import solve_triangular
 
-# ------------ Implementation des ersten Modells und dessen analyitischer Lösung --------------
-def ya1(x):
+# ------------ Implementation des Modells und dessen analytischer Lösung --------------
+def ya(x):     # analytische Lösung
     return - (16-(2/3)*x**3)**0.5  # für alle x grösser oder gleich 2*3**(1/3)
 
-def f1(x,y):
+def f(x,y):
     return -(x**2/y)
 
-def df1(x,y):
+def df(x,y):
     return x**2/y**2
 
+y0 = -4
 
-# ------------ Implementation des klassischen Runge-Kutta-Verfahren mit Ordnung 4 --------------
-def explicit_RK4_konstant(h, x_end, y0, f):
-
-    n = int(x_end / h)      # Anzahl Schritte
-    x = np.linspace(0, x_end, n+1)
-    y = np.zeros(n+1)
-    y[0] = y0
-
-    for i in range(n):
-        k1 = f(x[i], y[i])
-        k2 = f(x[i] + h/2, y[i] + h/2 * k1)
-        k3 = f(x[i] + h/2, y[i] + h/2 * k2)
-        k4 = f(x[i] + h, y[i] + h * k3)
-        y[i+1] = y[i] + h/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return x, y
-
-
-# ------------ Implementation des Runge-Kutta-Verfahrens 4. Ordnung (RK4) --------------
-def rk4(f, x0, y0, x_end, h):
-    # Anzahl der Schritte berechnen
-    N = int((x_end - x0) / h)
-
-    # Arrays für x und y initialisieren
-    x = np.linspace(x0, x_end, N+1)
-    y = np.zeros(N+1)
-    y[0] = y0
-
-    # RK4 Verfahren anwenden
-    for i in range(N):
-        k1 = h * f(x[i], y[i])
-        k2 = h * f(x[i] + h/2, y[i] + k1/2)
-        k3 = h * f(x[i] + h/2, y[i] + k2/2)
-        k4 = h * f(x[i] + h, y[i] + k3)
-        y[i+1] = y[i] + 1/6 * (k1 + 2*k2 + 2*k3 + k4)
-
-    return x, y
-
-# ------------ Implementation des Fehlberg-Verfahrens (RK5) --------------
-def rk5(f, x0, xf, y0, h):
-    a = np.array([0, 1/4, 3/8, 12/13, 1, 1/2])
-    b = np.array([
-        [0, 0, 0, 0, 0],
-        [1/4, 0, 0, 0, 0],
-        [3/32, 9/32, 0, 0, 0],
-        [1932/2197, -7200/2197, 7296/2197, 0, 0],
-        [439/216, -8, 3680/513, -845/4104, 0],
-        [-8/27, 2, -3544/2565, 1859/4104, -11/40]
-    ])
-    c1 = np.array([25/216, 0, 1408/2565, 2197/4104, -1/5, 0])
-    c2 = np.array([16/135, 0, 6656/12825, 28561/56430, -9/50, 2/55])
-    x = np.arange(x0, xf+h, h)
-    y = np.zeros((len(x), len(y0)))
-    y[0] = y0
-    for i in range(len(x)-1):
-        k = np.zeros((6, len(y0)))
-        for j in range(6):
-            k[j] = f(x[i] + h * a[j], y[i] + h * np.dot(b[j], k))
-        y[i+1] = y[i] + h * np.dot(c1, k)
-        y_hat = y[i] + h * np.dot(c2, k)
-        delta = np.max(np.abs(y_hat - y[i+1]))
-        tol = 0.01 * h
-        if delta > tol:
-            h *= 0.9 * (tol / delta)**0.2
-            x_new = x[i]
-            y_new = y[i]
-            continue
-        h *= 0.9 * (tol / delta)**0.25
-    return x, y
-
-
-
-# ------------ Implementation des Runge-Kutta-Fehlberg-Verfahrens (RKF45) --------------
-def rk45(f, x0, y0, x_end, h0, atol, rtol):
-    def runge_kutta_step(f, xn, yn, h):
-        k1 = h * f(xn, yn)
-        k2 = h * f(xn + h / 4, yn + k1 / 4)
-        k3 = h * f(xn + 3 * h / 8, yn + 3 * k1 / 32 + 9 * k2 / 32)
-        k4 = h * f(xn + 12 * h / 13, yn + 1932 * k1 / 2197 - 7200 * k2 / 2197 + 7296 * k3 / 2197)
-        k5 = h * f(xn + h, yn + 439 * k1 / 216 - 8 * k2 + 3680 * k3 / 513 - 845 * k4 / 4104)
-        k6 = h * f(xn + h / 2, yn - 8 * k1 / 27 + 2 * k2 - 3544 * k3 / 2565 + 1859 * k4 / 4104 - 11 * k5 / 40)
-        y_np1 = yn + 25 * k1 / 216 + 1408 * k3 / 2565 + 2197 * k4 / 4104 - k5 / 5
-        y_np1_hat = yn + 16 * k1 / 135 + 6656 * k3 / 12825 + 28561 * k4 / 56430 - 9 * k5 / 50 + 2 * k6 / 55
-        return y_np1, y_np1_hat
-
-    xn = x0
-    yn = y0
-    h = h0
-    x = [x0]
+# ------------ Definition allgemeines Runge-Kutta Verfahren explizit -------------------------------
+def Runge_Kutta(a, b, c, xend, h, y0, f):
+    x = [0.]
     y = [y0]
-    while xn < x_end:
-        y_np1, y_np1_hat = runge_kutta_step(f, xn, yn, h)
-        err = np.abs(y_np1 - y_np1_hat)
-        if err < atol + rtol * np.abs(y_np1):
-            xn = xn + h
-            yn = y_np1
-            x.append(xn)
-            y.append(yn)
-        if err != 0:
-            h = 0.84 * h * (atol / err) ** 0.25
+    s = np.size(b)
+    r = np.zeros(s)
+    xalt = 0
+    yalt = y0
+
+    while x[-1] < xend-h/2:
+        # Runge-Kutta Verfahren Schritt
+        for i in range(s):
+            r[i] = f(xalt + c[i] * h, yalt + h * sum(a[i]*r))
+        yneu = yalt + h * sum(b*r)
+        xneu = xalt + h
+
+        # Speichern des Resultats
+        y.append(yneu)
+        x.append(xneu)
+
+        yalt = yneu
+        xalt = xneu
+        r = np.zeros(s)
+    return np.array(x), np.array(y)
+
+
+
+# ------------ Definition Runge-Kutta Verfahren explizit mit Butcher Tableau 4. Ordnung -------------------------------
+def Runge_Kutta_4(xend, h, y0, f):
+    # Implementation des Butcher-Tableaus
+    a = np.array([[0,       0,       0,      0,     0,    0],
+                  [2/9,     0,       0,      0,     0,    0],
+                  [1/12,    1/4,     0,      0,     0,    0],
+                  [69/128, -243/128, 135/64, 0,     0,    0],
+                  [-17/12,  27/4,   -27/5,   16/15, 0,    0],
+                  [65/432, -5/16,    13/16,  4/27,  5/144,0]])
+    b = np.array([1/9, 0, 9/20, 16/45, 1/12, 0])
+    c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
+
+    return Runge_Kutta(a, b, c, xend, h, y0, f)
+
+
+# ------------ Definition Runge-Kutta Verfahren explizit mit Butcher Tableau 5. Ordnung -------------------------------
+def Runge_Kutta_5(xend, h, y0, f):
+    # Implementation des Butcher-Tableaus
+    a = np.array([[0,       0,       0,      0,     0,    0],
+                  [2/9,     0,       0,      0,     0,    0],
+                  [1/12,    1/4,     0,      0,     0,    0],
+                  [69/128, -243/128, 135/64, 0,     0,    0],
+                  [-17/12,  27/4,   -27/5,   16/15, 0,    0],
+                  [65/432, -5/16,    13/16,  4/27,  5/144,0]])
+    b = np.array([47/450, 0, 12/25, 32/225, 1/30, 6/25])
+    c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
+
+    return Runge_Kutta(a, b, c, xend, h, y0, f)
+
+
+# ------------ Berechnung und Darstellung des absoluten Fehlers -------------------------------------
+def absError(f, ya, y0):
+    xend = 2
+    h = []
+    err_rk4 = []
+    err_rk5 = []
+    for j in range(0, 12, 1):
+        hnew = 2 / (2 ** ((j+1) - 1))
+
+        xrk4, yrk4 = Runge_Kutta_4(xend, hnew, y0, f)
+        xrk5, yrk5 = Runge_Kutta_5(xend, hnew, y0, f)
+
+        h.append(hnew)
+        err_rk4.append(abs(ya(xend) - yrk4[-1]))
+        err_rk5.append(abs(ya(xend) - yrk5[-1]))
+
+    # Darstellung des Absoluten Fehlers bei Variabler Schrittweite
+    plt.figure('Fehler Runge-Kutta Verfahren')
+    plt.title('Fehler Runge-Kutta Verfahren bei verschiedenen Schrittweiten')
+    plt.loglog(h, err_rk4, 'o', label='Fehler Runge-Kutta 4. Ordnung')
+    plt.loglog(h, err_rk5, 'o', label='Fehler Runge-Kutta 5. Ordnung')
+    print(max(err_rk4))
+    print(max(err_rk5))
+    plt.xlabel('h')
+    plt.ylabel('absoluter Fehler')
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+    return err_rk4, err_rk5
+
+
+err_rk4, err_rk5 = absError(f, ya, y0)
+
+
+
+# ------------ Definition RK45 Verfahren mit Butcher Tableau -------------------------------
+def Runge_Kutta_45(xend, h, y0, f, tol):
+    # Implementation des Butcher-Tableaus
+    a = np.array([[0,       0,       0,      0,     0,    0],
+                  [2/9,     0,       0,      0,     0,    0],
+                  [1/12,    1/4,     0,      0,     0,    0],
+                  [69/128, -243/128, 135/64, 0,     0,    0],
+                  [-17/12,  27/4,   -27/5,   16/15, 0,    0],
+                  [65/432, -5/16,    13/16,  4/27,  5/144,0]])
+    b4 = np.array([1/9, 0, 9/20, 16/45, 1/12, 0])
+    b5 = np.array([47/450, 0, 12/25, 32/225, 1/30, 6/25])
+    c = np.array([0, 2/9, 1/3, 3/4, 1, 5/6])
+
+    x = [0.]
+    y = [y0]
+    xalt = 0
+    yalt = y0
+    s = 6
+    r = np.zeros(s)
+
+    while x[-1] < xend - h/2:
+        # Schritt mit RK4
+        r4 = np.zeros(s)
+        for i in range(s):
+            r4[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r4))
+        y4 = yalt + h*np.sum(b4*r4)
+
+        # Schritt mit RK5
+        r5 = np.zeros(s)
+        for i in range(s):
+            r5[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r5))
+        y5 = yalt + h*np.sum(b5*r5)
+
+        # Fehler abschätzen
+        Delta = np.abs(y4 - y5)
+
+        # Schrittweite anpassen
+        if Delta < tol/20:
+            h_neu = 2*h
+        elif Delta <= tol:
+            h_neu = h
         else:
-            h = 2 * h
-    return x, y
+            h_neu = h/2
+            h = h_neu
+            continue  # y_{k+1} nicht aktzeptieren und wiederholen mit halber Schrittweite
+
+        # Resultate speichern
+        x.append(xalt + h)
+        y.append(y5)
+        xalt = x[-1]
+        yalt = y[-1]
+        r = r5
+        h = h_neu
+
+    return np.array(x), np.array(y)
 
 
+
+# ------------ Lösen des Modellproblems mit dem RK45-Verfahren für versch. Toleranzen -------------------------------
+for j in range(1, 13, 1):
+    # Toleranz festlegen und RK45 mit dieser Toleranz aufrufen
+    tol = 10**-j
+    xrk45, yrk45 = Runge_Kutta_45(2, 0.1, y0, f, tol)
+
+    # Maximalen absoluten Fehler berechnen und ausgeben
+    max_err = 0
+    for k in range(len(xrk45)):
+        max_err = max(max_err, abs(ya(xrk45[k]) - yrk45[k]))
+    print(max_err)
 
