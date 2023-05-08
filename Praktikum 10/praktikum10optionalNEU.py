@@ -73,7 +73,6 @@ def Runge_Kutta_5(xend, h, y0, f):
 # ------------ Berechnung und Darstellung des absoluten Fehlers -------------------------------------
 def absError(f, ya, y0):
     xend = 2
-
     h = []
     err_rk4 = []
     err_rk5 = []
@@ -124,24 +123,24 @@ def Runge_Kutta_45(xend, h, y0, f, tol):
     y = [y0]
     xalt = 0
     yalt = y0
-    r = np.zeros(6)
+    s = 6
+    r = np.zeros(s)
 
     while x[-1] < xend - h/2:
         # Schritt mit RK4
-        r4 = np.zeros(6)
-        for i in range(6):
+        r4 = np.zeros(s)
+        for i in range(s):
             r4[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r4))
         y4 = yalt + h*np.sum(b4*r4)
 
         # Schritt mit RK5
-        r5 = np.zeros(6)
-        for i in range(6):
+        r5 = np.zeros(s)
+        for i in range(s):
             r5[i] = f(xalt + c[i]*h, yalt + h*np.sum(a[i]*r5))
         y5 = yalt + h*np.sum(b5*r5)
 
         # Fehler abschätzen
         Delta = np.abs(y4 - y5)
-        Delta_norm = np.linalg.norm(Delta)
 
         # Schrittweite anpassen
         if Delta < tol/20:
